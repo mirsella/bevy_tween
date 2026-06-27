@@ -11,7 +11,7 @@
 
 use super::*;
 use crate::InternedScheduleLabel;
-use ::bevy_lookup_curve::{LookupCache, LookupCurve};
+use crate::bevy_lookup_curve::{LookupCache, LookupCurve};
 use bevy::platform::collections::HashSet;
 use tracing::error;
 

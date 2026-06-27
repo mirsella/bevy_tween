@@ -7,7 +7,12 @@ where
 {
     type Item = I::Item;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
         (**self).interpolate(item, value, previous_value)
     }
 }
@@ -18,7 +23,12 @@ where
 {
     type Item = I::Item;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
         (**self).interpolate(item, value, previous_value)
     }
 }
@@ -29,15 +39,27 @@ where
 {
     type Item = I::Item;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
         (**self).interpolate(item, value, previous_value)
     }
 }
 
-impl<I: 'static> Interpolator for dyn Fn(&mut I, CurrentValue, PreviousValue) + Send + Sync + 'static {
+impl<I: 'static> Interpolator
+    for dyn Fn(&mut I, CurrentValue, PreviousValue) + Send + Sync + 'static
+{
     type Item = I;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
         self(item, value, previous_value)
     }
 }

@@ -156,37 +156,38 @@ pub fn apply_component_tween_system<I, TimeCtx>(
         .for_each(|(entity, tween, ease_value, mut previous_value)| match &tween.target {
             TargetComponent::Entities(e) => {
                 e.iter().for_each(|target| {
-                    let mut target_component =
-                        match q_component.get_mut(*target) {
-                            Ok(target_component) => target_component,
-                            Err(e) => {
-                                let e_no_world = QueryEntityErrorWithoutWorld::from(&e);
-                                if last_entity_error
+                    let mut target_component = match q_component.get_mut(*target) {
+                        Ok(target_component) => target_component,
+                        Err(e) => {
+                            let e_no_world = QueryEntityErrorWithoutWorld::from(&e);
+                            if last_entity_error
+                                .get(target)
+                                .map(|old_e| old_e != &e_no_world)
+                                .unwrap_or(true)
+                                && entity_error
                                     .get(target)
                                     .map(|old_e| old_e != &e_no_world)
                                     .unwrap_or(true)
-                                    && entity_error
-                                        .get(target)
-                                        .map(|old_e| old_e != &e_no_world)
-                                        .unwrap_or(true)
-                                {
-                                    error!(
-                                        "{} attempted to tween {} component but got query error: {e}",
-                                        type_name::<I>(),
-                                        type_name::<I::Item>()
-                                    );
-                                }
-                                entity_error.insert(*target, e_no_world);
-                                return;
+                            {
+                                error!(
+                                    "{} attempted to tween {} component but got query error: {e}",
+                                    type_name::<I>(),
+                                    type_name::<I::Item>()
+                                );
                             }
-                        };
-                    tween
-                        .interpolator
-                        .interpolate(&mut target_component, ease_value.0, previous_value.0);
+                            entity_error.insert(*target, e_no_world);
+                            return;
+                        }
+                    };
+                    tween.interpolator.interpolate(
+                        &mut target_component,
+                        ease_value.0,
+                        previous_value.0,
+                    );
                     previous_value.0 = ease_value.0;
                 });
             }
-            _ => {
+            TargetComponent::Marker | TargetComponent::Entity(_) => {
                 let target = match &tween.target {
                     TargetComponent::Marker => {
                         let mut curr = entity;
@@ -208,7 +209,9 @@ pub fn apply_component_tween_system<I, TimeCtx>(
                         match found {
                             Some(found) => found,
                             None => {
-                                if !last_search_error.contains(&entity) && !search_error.contains(&entity) {
+                                if !last_search_error.contains(&entity)
+                                    && !search_error.contains(&entity)
+                                {
                                     error!(
                                         "Tween {:?} {} cannot find AnimationTarget marker",
                                         entity,
@@ -217,11 +220,11 @@ pub fn apply_component_tween_system<I, TimeCtx>(
                                 }
                                 search_error.insert(entity);
                                 return;
-                            },
+                            }
                         }
                     }
                     TargetComponent::Entity(e) => *e,
-                    _ => unreachable!(),
+                    TargetComponent::Entities(_) => unreachable!("entities handled above"),
                 };
 
                 let mut target_component = match q_component.get_mut(target) {
@@ -247,9 +250,11 @@ pub fn apply_component_tween_system<I, TimeCtx>(
                         return;
                     }
                 };
-                tween
-                    .interpolator
-                    .interpolate(&mut target_component, ease_value.0, previous_value.0);
+                tween.interpolator.interpolate(
+                    &mut target_component,
+                    ease_value.0,
+                    previous_value.0,
+                );
                 previous_value.0 = ease_value.0;
             }
         });
@@ -288,7 +293,7 @@ where
 pub fn resource_tween_system<I>() -> ScheduleConfigs<ScheduleSystem>
 where
     I: Interpolator + Send + Sync + 'static,
-    I::Item: Resource,
+    I::Item: Resource<Mutability = Mutable>,
 {
     apply_resource_tween_system::<I, ()>.into_configs()
 }
@@ -299,7 +304,7 @@ pub fn resource_tween_system_with_time_context<I, TimeCtx>()
 -> ScheduleConfigs<ScheduleSystem>
 where
     I: Interpolator + Send + Sync + 'static,
-    I::Item: Resource,
+    I::Item: Resource<Mutability = Mutable>,
     TimeCtx: Default + Send + Sync + 'static,
 {
     apply_resource_tween_system::<I, TimeCtx>.into_configs()
@@ -372,7 +377,7 @@ pub fn apply_resource_tween_system<I, TimeCtx>(
     mut last_error: Local<bool>,
 ) where
     I: Interpolator,
-    I::Item: Resource,
+    I::Item: Resource<Mutability = Mutable>,
     TimeCtx: Default + Send + Sync + 'static,
 {
     let Some(mut resource) = resource else {
@@ -390,7 +395,7 @@ pub fn apply_resource_tween_system<I, TimeCtx>(
         .iter_mut()
         .for_each(|(tween, ease_value, mut previous_value)| {
             tween.interpolator.interpolate(
-                &mut resource,
+                resource.as_mut(),
                 ease_value.0,
                 previous_value.0,
             );
@@ -404,7 +409,7 @@ pub fn apply_resource_tween_system<I, TimeCtx>(
 /// You might want to use `resource_tween_system::<BoxedInterpolator<...>>()` for consistency
 pub fn resource_dyn_tween_system<R, TimeCtx>() -> ScheduleConfigs<ScheduleSystem>
 where
-    R: Resource,
+    R: Resource<Mutability = Mutable>,
     TimeCtx: Default + Send + Sync + 'static,
 {
     apply_resource_tween_system::<Box<dyn Interpolator<Item = R>>, TimeCtx>
@@ -523,7 +528,7 @@ pub fn apply_asset_tween_system<I, TimeCtx>(
                     asset_error.insert(a.id());
                     return;
                 };
-                tween.interpolator.interpolate(asset, ease_value.0, previous_value.0);
+                tween.interpolator.interpolate(asset.into_inner(), ease_value.0, previous_value.0);
                 previous_value.0 = ease_value.0;
             }
             TargetAsset::Assets(assets) => {
@@ -542,7 +547,7 @@ pub fn apply_asset_tween_system<I, TimeCtx>(
                         asset_error.insert(a.id());
                         continue;
                     };
-                    tween.interpolator.interpolate(a, ease_value.0, previous_value.0);
+                    tween.interpolator.interpolate(a.into_inner(), ease_value.0, previous_value.0);
                     previous_value.0 = ease_value.0;
                 }
             }

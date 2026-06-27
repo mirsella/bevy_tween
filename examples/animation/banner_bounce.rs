@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use bevy::render::view::Hdr;
+use bevy::camera::Hdr;
 use bevy::{
     color::{Srgba, palettes::css::WHITE},
     core_pipeline::tonemapping::Tonemapping,

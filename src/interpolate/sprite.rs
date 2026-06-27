@@ -12,19 +12,27 @@ pub struct SpriteColor {
     #[allow(missing_docs)]
     pub end: Color,
     /// whether it increments by delta or sets absolute values
-    pub delta: bool
+    pub delta: bool,
 }
 
 impl Interpolator for SpriteColor {
     type Item = Sprite;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
-        if self.delta{
-            let previous_color_as_vec = self.start.mix(&self.end, previous_value).to_linear();
-            let next_color_as_vec = self.start.mix(&self.end, value).to_linear();
-            let updated_color = item.color.to_linear() + (next_color_as_vec - previous_color_as_vec);
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
+        if self.delta {
+            let previous_color_as_vec =
+                self.start.mix(&self.end, previous_value).to_linear();
+            let next_color_as_vec =
+                self.start.mix(&self.end, value).to_linear();
+            let updated_color = item.color.to_linear()
+                + (next_color_as_vec - previous_color_as_vec);
             item.color = updated_color.into();
-        }else{
+        } else {
             item.color = self.start.mix(&self.end, value)
         }
     }
@@ -32,7 +40,11 @@ impl Interpolator for SpriteColor {
 
 /// Constructor for [`SpriteColor`]
 pub fn sprite_color(start: Color, end: Color) -> SpriteColor {
-    SpriteColor { start, end, delta: false }
+    SpriteColor {
+        start,
+        end,
+        delta: false,
+    }
 }
 
 /// Constructor for [`SpriteColor`] that's relative to previous value using currying.
@@ -51,7 +63,11 @@ pub fn sprite_color_delta_to(to: Color) -> impl Fn(&mut Color) -> SpriteColor {
         let start = *state;
         let end = to;
         *state = to;
-        SpriteColor {start, end, delta: true}
+        SpriteColor {
+            start,
+            end,
+            delta: true,
+        }
     }
 }
 
@@ -67,28 +83,39 @@ pub struct ColorMaterial {
     #[allow(missing_docs)]
     pub end: Color,
     /// whether it increments by delta or sets absolute values
-    pub delta: bool
+    pub delta: bool,
 }
 
 impl Interpolator for ColorMaterial {
     type Item = bevy::sprite_render::ColorMaterial;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
         if self.delta {
-            let previous_color_as_vec = self.start.mix(&self.end, previous_value).to_linear();
-            let next_color_as_vec = self.start.mix(&self.end, value).to_linear();
-            let updated_color = item.color.to_linear() + (next_color_as_vec - previous_color_as_vec);
+            let previous_color_as_vec =
+                self.start.mix(&self.end, previous_value).to_linear();
+            let next_color_as_vec =
+                self.start.mix(&self.end, value).to_linear();
+            let updated_color = item.color.to_linear()
+                + (next_color_as_vec - previous_color_as_vec);
             item.color = updated_color.into();
-        }else{
+        } else {
             item.color = self.start.mix(&self.end, value);
         }
     }
 }
 
-
 /// Constructor for [`ColorMaterial`](crate::interpolate::ColorMaterial)
 pub fn color_material(start: Color, end: Color) -> ColorMaterial {
-    ColorMaterial { start, end, delta: false }
+    ColorMaterial {
+        start,
+        end,
+        delta: false,
+    }
 }
 
 /// Constructor for [`ColorMaterial`](crate::interpolate::ColorMaterial) that's relative to previous value using currying.
@@ -102,11 +129,17 @@ pub fn color_material_to(to: Color) -> impl Fn(&mut Color) -> ColorMaterial {
 }
 
 /// Constructor for delta [`ColorMaterial`](crate::interpolate::ColorMaterial)
-pub fn color_material_delta_to(to: Color) -> impl Fn(&mut Color) -> ColorMaterial {
+pub fn color_material_delta_to(
+    to: Color,
+) -> impl Fn(&mut Color) -> ColorMaterial {
     move |state| {
         let start = *state;
         let end = to;
         *state = to;
-        ColorMaterial{start, end, delta: true}
+        ColorMaterial {
+            start,
+            end,
+            delta: true,
+        }
     }
 }

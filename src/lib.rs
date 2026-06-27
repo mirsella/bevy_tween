@@ -358,6 +358,7 @@
 #![cfg_attr(all(doc, CHANNEL_NIGHTLY), feature(doc_cfg))]
 #![warn(missing_docs)]
 
+use bevy::ecs::component::{Component, Mutable, StorageType};
 use bevy::ecs::schedule::{InternedScheduleLabel, ScheduleLabel};
 use bevy::ecs::system::ScheduleSystem;
 use bevy::{app::PluginGroupBuilder, prelude::*};
@@ -511,6 +512,13 @@ impl Default for DefaultTweenPlugins<()> {
 pub struct TweenAppResource {
     /// Configured schedule for tween systems.
     pub schedule: InternedScheduleLabel,
+}
+
+#[allow(deprecated)]
+impl Component for TweenAppResource {
+    const STORAGE_TYPE: StorageType = StorageType::Table;
+
+    type Mutability = Mutable;
 }
 
 #[allow(deprecated)]

@@ -12,18 +12,24 @@ pub struct Translation {
     #[allow(missing_docs)]
     pub end: Vec3,
     /// whether it increments by delta or sets absolute values
-    pub delta: bool
+    pub delta: bool,
 }
 impl Interpolator for Translation {
     type Item = Transform;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
-        if self.delta{
-            let previous_translation = self.start.lerp(self.end, previous_value);
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
+        if self.delta {
+            let previous_translation =
+                self.start.lerp(self.end, previous_value);
             let next_translation = self.start.lerp(self.end, value);
             let translation_delta = next_translation - previous_translation;
             item.translation += translation_delta;
-        }else{
+        } else {
             item.translation = self.start.lerp(self.end, value);
         }
     }
@@ -31,7 +37,11 @@ impl Interpolator for Translation {
 
 /// Constructor for [`Translation`]
 pub fn translation(start: Vec3, end: Vec3) -> Translation {
-    Translation { start, end, delta: false }
+    Translation {
+        start,
+        end,
+        delta: false,
+    }
 }
 
 /// Constructor for [`Translation`] that's relative to previous value using currying.
@@ -61,7 +71,11 @@ pub fn translation_delta_by(by: Vec3) -> impl Fn(&mut Vec3) -> Translation {
         let start = *state;
         let end = *state + by;
         *state += by;
-        Translation { start, end, delta: true }
+        Translation {
+            start,
+            end,
+            delta: true,
+        }
     }
 }
 
@@ -74,18 +88,23 @@ pub struct Rotation {
     #[allow(missing_docs)]
     pub end: Quat,
     /// whether it increments by delta or sets absolute values
-    pub delta: bool
+    pub delta: bool,
 }
 impl Interpolator for Rotation {
     type Item = Transform;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
-        if self.delta{
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
+        if self.delta {
             let previous_rotation = self.start.slerp(self.end, previous_value);
             let next_rotation = self.start.slerp(self.end, value);
             let rotation_delta = next_rotation - previous_rotation;
             item.rotation = item.rotation.mul_quat(rotation_delta);
-        }else{
+        } else {
             item.rotation = self.start.slerp(self.end, value);
         }
     }
@@ -93,7 +112,11 @@ impl Interpolator for Rotation {
 
 /// Constructor for [`Rotation`]
 pub fn rotation(start: Quat, end: Quat) -> Rotation {
-    Rotation { start, end, delta: false }
+    Rotation {
+        start,
+        end,
+        delta: false,
+    }
 }
 
 /// Constructor for [`Rotation`] that's relative to previous value using currying.
@@ -116,7 +139,6 @@ pub fn rotation_by(by: Quat) -> impl Fn(&mut Quat) -> Rotation {
     }
 }
 
-
 /// Constructor for [`Rotation`] that's relative to previous value
 /// Since this is a delta tween, it can happen with other ongoing tweens of that type
 pub fn rotation_delta_by(by: Quat) -> impl Fn(&mut Quat) -> Rotation {
@@ -124,7 +146,11 @@ pub fn rotation_delta_by(by: Quat) -> impl Fn(&mut Quat) -> Rotation {
         let start = *state;
         let end = *state + by;
         *state = state.mul_quat(by);
-        Rotation { start, end, delta: true }
+        Rotation {
+            start,
+            end,
+            delta: true,
+        }
     }
 }
 
@@ -137,27 +163,35 @@ pub struct Scale {
     #[allow(missing_docs)]
     pub end: Vec3,
     /// whether it increments by delta or sets absolute values
-    pub delta: bool
+    pub delta: bool,
 }
 impl Interpolator for Scale {
     type Item = Transform;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
-        if self.delta{
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
+        if self.delta {
             let previous_scale = self.start.lerp(self.end, previous_value);
             let next_scale = self.start.lerp(self.end, value);
             let scale_delta = next_scale - previous_scale;
             item.scale += scale_delta;
-        }else{
+        } else {
             item.scale = self.start.lerp(self.end, value);
         }
     }
 }
 
-
 /// Constructor for [`Scale`]
 pub fn scale(start: Vec3, end: Vec3) -> Scale {
-    Scale { start, end, delta: false }
+    Scale {
+        start,
+        end,
+        delta: false,
+    }
 }
 
 /// Constructor for [`Scale`] that's relative to previous value using currying.
@@ -187,7 +221,11 @@ pub fn scale_delta_by(by: Vec3) -> impl Fn(&mut Vec3) -> Scale {
         let start = *state;
         let end = *state + by;
         *state += by;
-        Scale { start, end, delta: true }
+        Scale {
+            start,
+            end,
+            delta: true,
+        }
     }
 }
 
@@ -201,28 +239,39 @@ pub struct AngleZ {
     #[allow(missing_docs)]
     pub end: f32,
     /// whether it increments by delta or sets absolute values
-    pub delta: bool
+    pub delta: bool,
 }
 impl Interpolator for AngleZ {
     type Item = Transform;
 
-    fn interpolate(&self, item: &mut Self::Item, value: f32, previous_value: f32) {
-        if self.delta{
-            let previous_angle = (self.end - self.start).mul_add(previous_value, self.start);
-            let update_angle = (self.end - self.start).mul_add(value, self.start);
-            let angle_delta_as_quat = Quat::from_rotation_z(update_angle - previous_angle);
+    fn interpolate(
+        &self,
+        item: &mut Self::Item,
+        value: f32,
+        previous_value: f32,
+    ) {
+        if self.delta {
+            let previous_angle =
+                (self.end - self.start).mul_add(previous_value, self.start);
+            let update_angle =
+                (self.end - self.start).mul_add(value, self.start);
+            let angle_delta_as_quat =
+                Quat::from_rotation_z(update_angle - previous_angle);
             item.rotation = item.rotation.mul_quat(angle_delta_as_quat);
-        }else{
+        } else {
             let angle = (self.end - self.start).mul_add(value, self.start);
             item.rotation = Quat::from_rotation_z(angle);
         }
     }
 }
 
-
 /// Constructor for [`AngleZ`]
 pub fn angle_z(start: f32, end: f32) -> AngleZ {
-    AngleZ { start, end, delta: false }
+    AngleZ {
+        start,
+        end,
+        delta: false,
+    }
 }
 
 /// Constructor for [`AngleZ`] that's relative to previous value using currying.
@@ -252,6 +301,10 @@ pub fn angle_z_delta_by(by: f32) -> impl Fn(&mut f32) -> AngleZ {
         let start = *state;
         let end = *state + by;
         *state += by;
-        AngleZ {start, end, delta: true}
+        AngleZ {
+            start,
+            end,
+            delta: true,
+        }
     }
 }
