@@ -29,7 +29,8 @@ features = ["curve"]
 
 [dependencies.bevy_time_runner]
 version = "0.6.0"
-path = "../bevy_time_runner"
+git = "https://github.com/mirsella/bevy_time_runner"
+branch = "mightyminions-0.19"
 
 [dependencies.serde]
 version = "1"
@@ -42,7 +43,8 @@ features = ["std"]
 
 [dependencies.bevy_lookup_curve ]
 version = "0.11.0"
-path = "../bevy_lookup_curve"
+git = "https://github.com/mirsella/bevy_lookup_curve"
+branch = "mightyminions-0.19"
 optional = true
 
 [dev-dependencies]
