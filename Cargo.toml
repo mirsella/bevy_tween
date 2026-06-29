@@ -42,7 +42,7 @@ version = "0.1.41"
 features = ["std"]
 
 [dependencies.bevy_lookup_curve ]
-version = "0.11.0"
+version = "0.12.0"
 git = "https://github.com/mirsella/bevy_lookup_curve"
 branch = "mightyminions-0.19"
 optional = true

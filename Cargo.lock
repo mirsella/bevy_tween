@@ -925,7 +925,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_lookup_curve"
-version = "0.11.0"
+version = "0.12.0"
 dependencies = [
  "bevy_app",
  "bevy_asset",
@@ -1412,6 +1412,7 @@ dependencies = [
 [[package]]
 name = "bevy_time_runner"
 version = "0.6.0"
+source = "git+https://github.com/mirsella/bevy_time_runner?branch=mightyminions-0.19#0ffd28d1299c38f6ce21b37271a6656a8baf2b9c"
 dependencies = [
  "bevy_app",
  "bevy_ecs",
